@@ -71,6 +71,11 @@ module "network_manager" {
   environment = var.environment
   stack       = var.stack
 
+  network_manager_scope_accesses = ["Connectivity", "SecurityAdmin"]
+  network_manager_scope = {
+    subscription_ids = [var.azure_subscription_id]
+  }
+
   logs_destinations_ids = [
     module.run.logs_storage_account_id,
     module.run.log_analytics_workspace_id
@@ -87,27 +92,25 @@ module "network_manager" {
 | Name | Version |
 |------|---------|
 | azurecaf | ~> 1.2, >= 1.2.22 |
-| azurerm | ~> 3.36 |
+| azurerm | ~> 3.63 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| diagnostics | claranet/diagnostic-settings/azurerm | n/a |
+| diagnostics | claranet/diagnostic-settings/azurerm | ~> 6.5.0 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [azurerm_network_manager.network_manager](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager) | resource |
+| [azurerm_network_manager.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager) | resource |
 | [azurecaf_name.network_manager](https://registry.terraform.io/providers/aztfmod/azurecaf/latest/docs/data-sources/name) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| allowed\_cidrs | List of allowed CIDR ranges to access the Azure Network Manager resource. | `list(string)` | `[]` | no |
-| allowed\_subnet\_ids | List of allowed subnets IDs to access the Azure Network Manager resource. | `list(string)` | `[]` | no |
 | client\_name | Client name/account used in naming. | `string` | n/a | yes |
 | custom\_diagnostic\_settings\_name | Custom name of the diagnostics settings, name will be 'default' if not set. | `string` | `"default"` | no |
 | custom\_name | Custom Azure Network Manager, generated if not set | `string` | `""` | no |
@@ -121,8 +124,10 @@ module "network_manager" {
 | logs\_metrics\_categories | Metrics categories to send to destinations. | `list(string)` | `null` | no |
 | name\_prefix | Optional prefix for the generated name | `string` | `""` | no |
 | name\_suffix | Optional suffix for the generated name | `string` | `""` | no |
-| network\_bypass | Specify whether traffic is bypassed for 'Logging', 'Metrics', 'AzureServices' or 'None'. | `list(string)` | <pre>[<br>  "Logging",<br>  "Metrics",<br>  "AzureServices"<br>]</pre> | no |
-| public\_network\_access\_enabled | Whether the Azure Network Manager is available from public network. | `bool` | `false` | no |
+| network\_manager\_description | (Optional) A description of the network manager. | `string` | `null` | no |
+| network\_manager\_scope | - `management_group_ids` - (Optional) A list of management group IDs.<br>- `subscription_ids` - (Optional) A list of subscription IDs. | <pre>object({<br>    management_group_ids = optional(list(string))<br>    subscription_ids     = optional(list(string))<br>  })</pre> | n/a | yes |
+| network\_manager\_scope\_accesses | (Required) A list of configuration deployment type. Possible values are `Connectivity` and `SecurityAdmin`, corresponds to if Connectivity Configuration and Security Admin Configuration is allowed for the Network Manager. | `list(string)` | n/a | yes |
+| network\_manager\_timeouts | - `create` - (Defaults to 30 minutes) Used when creating the Network Managers.<br>- `delete` - (Defaults to 30 minutes) Used when deleting the Network Managers.<br>- `read` - (Defaults to 5 minutes) Used when retrieving the Network Managers.<br>- `update` - (Defaults to 30 minutes) Used when updating the Network Managers. | <pre>object({<br>    create = optional(string)<br>    delete = optional(string)<br>    read   = optional(string)<br>    update = optional(string)<br>  })</pre> | `null` | no |
 | resource\_group\_name | Name of the resource group. | `string` | n/a | yes |
 | stack | Project stack name. | `string` | n/a | yes |
 
@@ -130,10 +135,9 @@ module "network_manager" {
 
 | Name | Description |
 |------|-------------|
-| id | Azure Network Manager ID |
-| identity\_principal\_id | Azure Network Manager system identity principal ID |
-| name | Azure Network Manager name |
-| network\_manager | Azure Network Manager output object |
+| id | Azure Network Manager ID. |
+| name | Azure Network Manager name. |
+| network\_manager | Azure Network Manager output object. |
 <!-- END_TF_DOCS -->
 
 ## Related documentation

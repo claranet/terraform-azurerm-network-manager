@@ -39,6 +39,11 @@ module "network_manager" {
   environment = var.environment
   stack       = var.stack
 
+  network_manager_scope_accesses = ["Connectivity", "SecurityAdmin"]
+  network_manager_scope = {
+    subscription_ids = [var.azure_subscription_id]
+  }
+
   logs_destinations_ids = [
     module.run.logs_storage_account_id,
     module.run.log_analytics_workspace_id
