@@ -58,7 +58,16 @@ module "network_manager" {
       description = "All floating spokes in prod"
       member_type = "VirtualNetwork"
       static_members = [
-        # module.spoke3.vnet_id,
+        # module.spoke3.vnet.id,
+      ]
+    },
+    {
+      ng_name     = "hubspoke-euw"
+      description = "All spokes in prod region1"
+      member_type = "VirtualNetwork"
+      static_members = [
+        # module.spoke1.vnet.id,
+        # module.spoke2.vnet.id,
       ]
     },
   ]
@@ -74,8 +83,46 @@ module "network_manager" {
         global_mesh_enabled = true
       }
     },
+    {
+      connectivity_name     = "hubspoke-region-euw"
+      deploy                = true
+      network_group_name    = "hubspoke-euw"
+      connectivity_topology = "HubAndSpoke"
+      global_mesh_enabled   = false
+      applies_to_group = {
+        group_connectivity  = "None"
+        global_mesh_enabled = false
+        use_hub_gateway     = true
+      }
+      # hub = {
+      #   resource_id   = module.hub1.vnet.id
+      #   resource_type = "Microsoft.Network/virtualNetworks"
+      # }
+    },
   ]
 
+  security_admin_configurations = [
+    {
+      deploy              = true
+      apply_default_rules = true
+      sac_name            = "hubspoke-euw-soc1"
+      rule_collections    = []
+    },
+    {
+      sac_name            = "hubspoke-euw-soc2"
+      apply_default_rules = true
+      rule_collections    = []
+    },
+  ]
+
+  connectivity_deployment = {
+    configuration_names = ["hubspoke-region-euw", ]
+  }
+
+  security_deployment = {
+    configuration_names = ["hubspoke-euw-soc1"]
+    configuration_ids   = []
+  }
 
   logs_destinations_ids = [
     module.run.logs_storage_account_id,

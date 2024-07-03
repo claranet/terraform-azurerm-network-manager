@@ -74,7 +74,7 @@ variable "security_admin_configurations" {
 }
 
 variable "connectivity_deployment" {
-  description = "Connectivity deployment configuration."
+  description = "Connectivity deployment configuration over `connectivity` created objects."
   type = object({
     configuration_names = optional(list(string), [])
     configuration_ids   = optional(list(string), [])
@@ -83,7 +83,7 @@ variable "connectivity_deployment" {
 }
 
 variable "security_deployment" {
-  description = "Security deployment configuration."
+  description = "Security deployment configuration over `security_admin` created objects."
   type = object({
     configuration_names = optional(list(string), [])
     configuration_ids   = optional(list(string), [])

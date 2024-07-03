@@ -90,7 +90,16 @@ module "network_manager" {
       description = "All floating spokes in prod"
       member_type = "VirtualNetwork"
       static_members = [
-        # module.spoke3.vnet_id,
+        # module.spoke3.vnet.id,
+      ]
+    },
+    {
+      ng_name     = "hubspoke-euw"
+      description = "All spokes in prod region1"
+      member_type = "VirtualNetwork"
+      static_members = [
+        # module.spoke1.vnet.id,
+        # module.spoke2.vnet.id,
       ]
     },
   ]
@@ -106,8 +115,46 @@ module "network_manager" {
         global_mesh_enabled = true
       }
     },
+    {
+      connectivity_name     = "hubspoke-region-euw"
+      deploy                = true
+      network_group_name    = "hubspoke-euw"
+      connectivity_topology = "HubAndSpoke"
+      global_mesh_enabled   = false
+      applies_to_group = {
+        group_connectivity  = "None"
+        global_mesh_enabled = false
+        use_hub_gateway     = true
+      }
+      # hub = {
+      #   resource_id   = module.hub1.vnet.id
+      #   resource_type = "Microsoft.Network/virtualNetworks"
+      # }
+    },
   ]
 
+  security_admin_configurations = [
+    {
+      deploy              = true
+      apply_default_rules = true
+      sac_name            = "hubspoke-euw-soc1"
+      rule_collections    = []
+    },
+    {
+      sac_name            = "hubspoke-euw-soc2"
+      apply_default_rules = true
+      rule_collections    = []
+    },
+  ]
+
+  connectivity_deployment = {
+    configuration_names = ["hubspoke-region-euw", ]
+  }
+
+  security_deployment = {
+    configuration_names = ["hubspoke-euw-soc1"]
+    configuration_ids   = []
+  }
 
   logs_destinations_ids = [
     module.run.logs_storage_account_id,
@@ -157,7 +204,7 @@ module "network_manager" {
 |------|-------------|------|---------|:--------:|
 | client\_name | Client name/account used in naming. | `string` | n/a | yes |
 | connectivity\_configurations | Connectivity configurations to be created in the Azure Network Manager. | <pre>list(object({<br>    connectivity_name     = string<br>    network_group_name    = string<br>    custom_name           = optional(string)<br>    connectivity_topology = optional(string)<br>    global_mesh_enabled   = optional(bool, false)<br>    deploy                = optional(bool, false)<br><br>    hub = optional(object({<br>      resource_id   = string<br>      resource_type = optional(string, "Microsoft.Network/virtualNetworks")<br>    }), null)<br><br>    applies_to_group = object({<br>      group_connectivity  = optional(string, "None")<br>      global_mesh_enabled = optional(bool, false)<br>      use_hub_gateway     = optional(bool, false)<br>    })<br>  }))</pre> | `[]` | no |
-| connectivity\_deployment | Connectivity deployment configuration. | <pre>object({<br>    configuration_names = optional(list(string), [])<br>    configuration_ids   = optional(list(string), [])<br>  })</pre> | `{}` | no |
+| connectivity\_deployment | Connectivity deployment configuration over `connectivity` created objects. | <pre>object({<br>    configuration_names = optional(list(string), [])<br>    configuration_ids   = optional(list(string), [])<br>  })</pre> | `{}` | no |
 | custom\_diagnostic\_settings\_name | Custom name of the diagnostics settings, name will be 'default' if not set. | `string` | `"default"` | no |
 | custom\_name | Custom Azure Network Manager, generated if not set | `string` | `""` | no |
 | default\_tags\_enabled | Option to enable or disable default tags. | `bool` | `true` | no |
@@ -177,7 +224,7 @@ module "network_manager" {
 | network\_manager\_timeouts | - `create` - (Defaults to 30 minutes) Used when creating the Network Managers.<br>- `delete` - (Defaults to 30 minutes) Used when deleting the Network Managers.<br>- `read` - (Defaults to 5 minutes) Used when retrieving the Network Managers.<br>- `update` - (Defaults to 30 minutes) Used when updating the Network Managers. | <pre>object({<br>    create = optional(string)<br>    delete = optional(string)<br>    read   = optional(string)<br>    update = optional(string)<br>  })</pre> | `null` | no |
 | resource\_group\_name | Name of the resource group. | `string` | n/a | yes |
 | security\_admin\_configurations | Security admin configurations to be created in the Azure Network Manager. | <pre>list(object({<br>    sac_name            = string<br>    custom_name         = optional(string)<br>    description         = optional(string)<br>    apply_default_rules = optional(bool, true)<br>    deploy              = optional(bool, false)<br><br>    rule_collections = optional(list(object({<br>      name              = string<br>      description       = optional(string)<br>      network_group_ids = list(string)<br>      rules = list(object({<br>        name                    = string<br>        description             = optional(string)<br>        action                  = string<br>        direction               = string<br>        priority                = number<br>        protocol                = string<br>        destination_port_ranges = list(string)<br>        source = list(object({<br>          address_prefix_type = string<br>          address_prefix      = string<br>        }))<br>        destinations = list(object({<br>          address_prefix_type = string<br>          address_prefix      = string<br>        }))<br>      }))<br>    })))<br>  }))</pre> | `[]` | no |
-| security\_deployment | Security deployment configuration. | <pre>object({<br>    configuration_names = optional(list(string), [])<br>    configuration_ids   = optional(list(string), [])<br>  })</pre> | `{}` | no |
+| security\_deployment | Security deployment configuration over `security_admin` created objects. | <pre>object({<br>    configuration_names = optional(list(string), [])<br>    configuration_ids   = optional(list(string), [])<br>  })</pre> | `{}` | no |
 | stack | Project stack name. | `string` | n/a | yes |
 
 ## Outputs
