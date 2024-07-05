@@ -1,3 +1,15 @@
+## 7.0.1 (2024-07-05)
+
+
+### Bug Fixes
+
+* update CHANGELOG c790886
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency tflint to v0.51.2 907c14b
+
 ## 7.0.0 (2024-07-05)
 
 
