@@ -43,7 +43,7 @@ locals {
       for id in ng.static_members : {
         name             = basename(id)
         resource_id      = id
-        network_group_id = azurerm_network_manager_network_group.vnet[ng.ng_name].id
+        network_group_id = azurerm_network_manager_network_group.main[ng.ng_name].id
       }
     ] if ng.member_type == "VirtualNetwork"
   ])
@@ -67,15 +67,15 @@ locals {
   connectivity_configuration_ids_to_deploy = concat(
     var.connectivity_deployment.configuration_ids,
     [for c in var.connectivity_deployment.configuration_names :
-      azurerm_network_manager_connectivity_configuration.this[c].id
-      if contains(keys(azurerm_network_manager_connectivity_configuration.this), c)
+      azurerm_network_manager_connectivity_configuration.main[c].id
+      if contains(keys(azurerm_network_manager_connectivity_configuration.main), c)
     ]
   )
   security_configuration_ids_to_deploy = concat(
     var.security_deployment.configuration_ids,
     [for c in var.security_deployment.configuration_names :
-      azurerm_network_manager_security_admin_configuration.this[c].id
-      if contains(keys(azurerm_network_manager_security_admin_configuration.this), c)
+      azurerm_network_manager_security_admin_configuration.main[c].id
+      if contains(keys(azurerm_network_manager_security_admin_configuration.main), c)
     ]
   )
 }

@@ -184,15 +184,15 @@ module "network_manager" {
 
 | Name | Type |
 |------|------|
-| [azurerm_network_manager.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager) | resource |
+| [azurerm_network_manager.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager) | resource |
 | [azurerm_network_manager_admin_rule.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule) | resource |
 | [azurerm_network_manager_admin_rule_collection.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule_collection) | resource |
-| [azurerm_network_manager_connectivity_configuration.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_connectivity_configuration) | resource |
+| [azurerm_network_manager_connectivity_configuration.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_connectivity_configuration) | resource |
 | [azurerm_network_manager_deployment.connectivity](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_deployment) | resource |
 | [azurerm_network_manager_deployment.security](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_deployment) | resource |
-| [azurerm_network_manager_network_group.vnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_network_group) | resource |
-| [azurerm_network_manager_security_admin_configuration.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_security_admin_configuration) | resource |
-| [azurerm_network_manager_static_member.vnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_static_member) | resource |
+| [azurerm_network_manager_network_group.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_network_group) | resource |
+| [azurerm_network_manager_security_admin_configuration.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_security_admin_configuration) | resource |
+| [azurerm_network_manager_static_member.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_static_member) | resource |
 | [azurecaf_name.network_manager](https://registry.terraform.io/providers/aztfmod/azurecaf/latest/docs/data-sources/name) | data source |
 | [azurecaf_name.network_manager_connectivity_configuration](https://registry.terraform.io/providers/aztfmod/azurecaf/latest/docs/data-sources/name) | data source |
 | [azurecaf_name.network_manager_group](https://registry.terraform.io/providers/aztfmod/azurecaf/latest/docs/data-sources/name) | data source |
@@ -218,9 +218,9 @@ module "network_manager" {
 | name\_prefix | Optional prefix for the generated name | `string` | `""` | no |
 | name\_suffix | Optional suffix for the generated name | `string` | `""` | no |
 | network\_groups | Network groups to be created in the Azure Network Manager. | <pre>list(object({<br>    ng_name        = string<br>    custom_name    = optional(string)<br>    description    = optional(string)<br>    member_type    = optional(string, "VirtualNetwork")<br>    static_members = optional(list(string))<br>  }))</pre> | `[]` | no |
-| network\_manager\_description | (Optional) A description of the network manager. | `string` | `null` | no |
+| network\_manager\_description | A description of the Network Manager. | `string` | `null` | no |
 | network\_manager\_scope | - `management_group_ids` - (Optional) A list of management group IDs.<br>- `subscription_ids` - (Optional) A list of subscription IDs. | <pre>object({<br>    management_group_ids = optional(list(string))<br>    subscription_ids     = optional(list(string))<br>  })</pre> | n/a | yes |
-| network\_manager\_scope\_accesses | (Required) A list of configuration deployment type. Possible values are `Connectivity` and `SecurityAdmin`, corresponds to if Connectivity Configuration and Security Admin Configuration is allowed for the Network Manager. | `list(string)` | n/a | yes |
+| network\_manager\_scope\_accesses | A list of configuration deployment type. Possible values are `Connectivity` and `SecurityAdmin`, corresponds to if Connectivity Configuration and Security Admin Configuration is allowed for the Network Manager. | `list(string)` | n/a | yes |
 | network\_manager\_timeouts | - `create` - (Defaults to 30 minutes) Used when creating the Network Managers.<br>- `delete` - (Defaults to 30 minutes) Used when deleting the Network Managers.<br>- `read` - (Defaults to 5 minutes) Used when retrieving the Network Managers.<br>- `update` - (Defaults to 30 minutes) Used when updating the Network Managers. | <pre>object({<br>    create = optional(string)<br>    delete = optional(string)<br>    read   = optional(string)<br>    update = optional(string)<br>  })</pre> | `null` | no |
 | resource\_group\_name | Name of the resource group. | `string` | n/a | yes |
 | security\_admin\_configurations | Security admin configurations to be created in the Azure Network Manager. | <pre>list(object({<br>    sac_name            = string<br>    custom_name         = optional(string)<br>    description         = optional(string)<br>    apply_default_rules = optional(bool, true)<br>    deploy              = optional(bool, false)<br><br>    rule_collections = optional(list(object({<br>      name              = string<br>      description       = optional(string)<br>      network_group_ids = list(string)<br>      rules = list(object({<br>        name                    = string<br>        description             = optional(string)<br>        action                  = string<br>        direction               = string<br>        priority                = number<br>        protocol                = string<br>        destination_port_ranges = list(string)<br>        source = list(object({<br>          address_prefix_type = string<br>          address_prefix      = string<br>        }))<br>        destinations = list(object({<br>          address_prefix_type = string<br>          address_prefix      = string<br>        }))<br>      }))<br>    })))<br>  }))</pre> | `[]` | no |

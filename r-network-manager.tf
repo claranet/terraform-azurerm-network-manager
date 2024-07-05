@@ -1,4 +1,4 @@
-resource "azurerm_network_manager" "this" {
+resource "azurerm_network_manager" "main" {
   name = local.network_manager_name
 
   location = var.location

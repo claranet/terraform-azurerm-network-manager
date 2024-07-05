@@ -11,13 +11,18 @@ EOT
 }
 
 variable "network_manager_scope_accesses" {
-  description = "(Required) A list of configuration deployment type. Possible values are `Connectivity` and `SecurityAdmin`, corresponds to if Connectivity Configuration and Security Admin Configuration is allowed for the Network Manager."
+  description = "A list of configuration deployment type. Possible values are `Connectivity` and `SecurityAdmin`, corresponds to if Connectivity Configuration and Security Admin Configuration is allowed for the Network Manager."
   type        = list(string)
   nullable    = false
+
+  validation {
+    condition     = alltrue([for s in var.network_manager_scope_accesses : contains(["Connectivity", "SecurityAdmin"], s)])
+    error_message = "`var.network_manager_scope_accesses` must be a list of 'Connectivity' or 'SecurityAdmin' strings."
+  }
 }
 
 variable "network_manager_description" {
-  description = "(Optional) A description of the network manager."
+  description = "A description of the Network Manager."
   type        = string
   default     = null
 }

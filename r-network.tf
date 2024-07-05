@@ -9,16 +9,16 @@
 
 # group
 
-resource "azurerm_network_manager_network_group" "vnet" {
+resource "azurerm_network_manager_network_group" "main" {
   for_each           = { for ng in var.network_groups : ng.ng_name => ng }
   name               = coalesce(each.value.custom_name, data.azurecaf_name.network_manager_group[each.key].result)
-  network_manager_id = azurerm_network_manager.this.id
+  network_manager_id = azurerm_network_manager.main.id
   description        = each.value.description
 }
 
 # static members
 
-resource "azurerm_network_manager_static_member" "vnet" {
+resource "azurerm_network_manager_static_member" "main" {
   for_each                  = { for member in local.static_members_vnet : member.resource_id => member }
   name                      = lower(each.value.name)
   network_group_id          = each.value.network_group_id
@@ -37,10 +37,10 @@ resource "azurerm_network_manager_static_member" "vnet" {
 # connectivity
 #-----------------------
 
-resource "azurerm_network_manager_connectivity_configuration" "this" {
+resource "azurerm_network_manager_connectivity_configuration" "main" {
   for_each              = { for cc in var.connectivity_configurations : cc.connectivity_name => cc }
   name                  = coalesce(each.value.custom_name, data.azurecaf_name.network_manager_connectivity_configuration[each.key].result)
-  network_manager_id    = azurerm_network_manager.this.id
+  network_manager_id    = azurerm_network_manager.main.id
   connectivity_topology = each.value.connectivity_topology
 
   dynamic "hub" {
@@ -53,7 +53,7 @@ resource "azurerm_network_manager_connectivity_configuration" "this" {
 
   applies_to_group {
     group_connectivity  = each.value.applies_to_group.group_connectivity
-    network_group_id    = azurerm_network_manager_network_group.vnet[each.value.network_group_name].id
+    network_group_id    = azurerm_network_manager_network_group.main[each.value.network_group_name].id
     global_mesh_enabled = each.value.applies_to_group.global_mesh_enabled
     use_hub_gateway     = each.value.applies_to_group.use_hub_gateway
   }
@@ -62,10 +62,10 @@ resource "azurerm_network_manager_connectivity_configuration" "this" {
 # security
 #-----------------------
 
-resource "azurerm_network_manager_security_admin_configuration" "this" {
+resource "azurerm_network_manager_security_admin_configuration" "main" {
   for_each           = { for sac in var.security_admin_configurations : sac.sac_name => sac }
   name               = coalesce(each.value.custom_name, data.azurecaf_name.network_manager_security_admin[each.key].result)
-  network_manager_id = azurerm_network_manager.this.id
+  network_manager_id = azurerm_network_manager.main.id
 }
 
 # default
@@ -73,8 +73,8 @@ resource "azurerm_network_manager_security_admin_configuration" "this" {
 resource "azurerm_network_manager_admin_rule_collection" "default" {
   for_each                        = { for sac in var.security_admin_configurations : sac.sac_name => sac.apply_default_rules }
   name                            = "arc-${each.key}-default"
-  security_admin_configuration_id = azurerm_network_manager_security_admin_configuration.this[each.key].id
-  network_group_ids               = [for ng in var.network_groups : azurerm_network_manager_network_group.vnet[ng.name].id]
+  security_admin_configuration_id = azurerm_network_manager_security_admin_configuration.main[each.key].id
+  network_group_ids               = [for ng in var.network_groups : azurerm_network_manager_network_group.main[ng.name].id]
 }
 
 resource "azurerm_network_manager_admin_rule" "default" {
@@ -114,7 +114,7 @@ resource "azurerm_network_manager_admin_rule" "default" {
 
 resource "azurerm_network_manager_deployment" "connectivity" {
   count              = length(local.connectivity_configuration_ids_to_deploy) > 0 ? 1 : 0
-  network_manager_id = azurerm_network_manager.this.id
+  network_manager_id = azurerm_network_manager.main.id
   location           = var.location
   scope_access       = "Connectivity"
 
@@ -126,8 +126,8 @@ resource "azurerm_network_manager_deployment" "connectivity" {
     })
   }
   depends_on = [
-    azurerm_network_manager_connectivity_configuration.this,
-    azurerm_network_manager_security_admin_configuration.this,
+    azurerm_network_manager_connectivity_configuration.main,
+    azurerm_network_manager_security_admin_configuration.main,
     azurerm_network_manager_admin_rule.default,
   ]
 }
@@ -137,7 +137,7 @@ resource "azurerm_network_manager_deployment" "connectivity" {
 
 resource "azurerm_network_manager_deployment" "security" {
   count              = length(local.security_configuration_ids_to_deploy) > 0 ? 1 : 0
-  network_manager_id = azurerm_network_manager.this.id
+  network_manager_id = azurerm_network_manager.main.id
   location           = var.location
   scope_access       = "SecurityAdmin"
   configuration_ids  = local.security_configuration_ids_to_deploy
