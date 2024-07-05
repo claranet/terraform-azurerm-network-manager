@@ -1,25 +1,92 @@
-# Network/firewall variables
-
-variable "public_network_access_enabled" {
-  description = "Whether the Azure Network Manager is available from public network."
-  type        = bool
-  default     = false
+variable "network_groups" {
+  description = "Network groups to be created in the Azure Network Manager."
+  type = list(object({
+    ng_name        = string
+    custom_name    = optional(string)
+    description    = optional(string)
+    member_type    = optional(string, "VirtualNetwork")
+    static_members = optional(list(string))
+  }))
+  default  = []
+  nullable = false
 }
 
-variable "network_bypass" {
-  description = "Specify whether traffic is bypassed for 'Logging', 'Metrics', 'AzureServices' or 'None'."
-  type        = list(string)
-  default     = ["Logging", "Metrics", "AzureServices"]
+variable "connectivity_configurations" {
+  description = "Connectivity configurations to be created in the Azure Network Manager."
+  type = list(object({
+    connectivity_name     = string
+    network_group_name    = string
+    custom_name           = optional(string)
+    connectivity_topology = optional(string)
+    global_mesh_enabled   = optional(bool, false)
+    deploy                = optional(bool, false)
+
+    hub = optional(object({
+      resource_id   = string
+      resource_type = optional(string, "Microsoft.Network/virtualNetworks")
+    }), null)
+
+    applies_to_group = object({
+      group_connectivity  = optional(string, "None")
+      global_mesh_enabled = optional(bool, false)
+      use_hub_gateway     = optional(bool, false)
+    })
+  }))
+  default  = []
+  nullable = false
 }
 
-variable "allowed_cidrs" {
-  description = "List of allowed CIDR ranges to access the Azure Network Manager resource."
-  type        = list(string)
-  default     = []
+variable "security_admin_configurations" {
+  description = "Security admin configurations to be created in the Azure Network Manager."
+
+  type = list(object({
+    sac_name            = string
+    custom_name         = optional(string)
+    description         = optional(string)
+    apply_default_rules = optional(bool, true)
+    deploy              = optional(bool, false)
+
+    rule_collections = optional(list(object({
+      name              = string
+      description       = optional(string)
+      network_group_ids = list(string)
+      rules = list(object({
+        name                    = string
+        description             = optional(string)
+        action                  = string
+        direction               = string
+        priority                = number
+        protocol                = string
+        destination_port_ranges = list(string)
+        source = list(object({
+          address_prefix_type = string
+          address_prefix      = string
+        }))
+        destinations = list(object({
+          address_prefix_type = string
+          address_prefix      = string
+        }))
+      }))
+    })))
+  }))
+  default  = []
+  nullable = false
 }
 
-variable "allowed_subnet_ids" {
-  description = "List of allowed subnets IDs to access the Azure Network Manager resource."
-  type        = list(string)
-  default     = []
+variable "connectivity_deployment" {
+  description = "Connectivity deployment configuration over `connectivity` created objects."
+  type = object({
+    configuration_names = optional(list(string), [])
+    configuration_ids   = optional(list(string), [])
+  })
+  default = {}
+}
+
+variable "security_deployment" {
+  description = "Security deployment configuration over `security_admin` created objects."
+  type = object({
+    configuration_names = optional(list(string), [])
+    configuration_ids   = optional(list(string), [])
+  })
+  default = {}
 }
