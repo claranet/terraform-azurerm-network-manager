@@ -1,4 +1,4 @@
-## 1.0.0 (2024-07-05)
+## 7.0.0 (2024-07-05)
 
 
 ### Features
@@ -21,8 +21,3 @@
 ### Miscellaneous Chores
 
 * **deps:** update pre-commit hook antonbabenko/pre-commit-terraform to v1.92.0 26e4b7e
-
-# Unreleased
-
-Added
-  * AZ-1427: Azure Network Manager module first release
