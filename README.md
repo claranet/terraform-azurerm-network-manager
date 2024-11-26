@@ -175,6 +175,7 @@ module "network_manager" {
 
 | Name | Version |
 |------|---------|
+| azapi | >= 2.0 |
 | azurecaf | ~> 1.2, >= 1.2.22 |
 | azurerm | ~> 3.63 |
 
@@ -188,6 +189,7 @@ module "network_manager" {
 
 | Name | Type |
 |------|------|
+| [azapi_resource_action.main](https://registry.terraform.io/providers/hashicorp/azapi/latest/docs/resources/resource_action) | resource |
 | [azurerm_network_manager.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager) | resource |
 | [azurerm_network_manager_admin_rule.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule) | resource |
 | [azurerm_network_manager_admin_rule_collection.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule_collection) | resource |
