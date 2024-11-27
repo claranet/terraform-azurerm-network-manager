@@ -51,11 +51,16 @@ resource "azurerm_network_manager_connectivity_configuration" "main" {
     }
   }
 
-  applies_to_group {
-    group_connectivity  = each.value.applies_to_group.group_connectivity
-    network_group_id    = azurerm_network_manager_network_group.main[each.value.network_group_name].id
-    global_mesh_enabled = each.value.applies_to_group.global_mesh_enabled
-    use_hub_gateway     = each.value.applies_to_group.use_hub_gateway
+  dynamic "applies_to_group" {
+    for_each = each.value.applies_to_groups
+    iterator = grp
+
+    content {
+      group_connectivity  = grp.value.group_connectivity
+      network_group_id    = azurerm_network_manager_network_group.main[grp.value.network_group_name].id
+      global_mesh_enabled = grp.value.global_mesh_enabled
+      use_hub_gateway     = grp.value.use_hub_gateway
+    }
   }
 }
 
@@ -74,7 +79,7 @@ resource "azurerm_network_manager_admin_rule_collection" "default" {
   for_each                        = { for sac in var.security_admin_configurations : sac.sac_name => sac.apply_default_rules }
   name                            = "arc-${each.key}-default"
   security_admin_configuration_id = azurerm_network_manager_security_admin_configuration.main[each.key].id
-  network_group_ids               = [for ng in var.network_groups : azurerm_network_manager_network_group.main[ng.name].id]
+  network_group_ids               = [for ng in var.network_groups : azurerm_network_manager_network_group.main[ng.ng_name].id]
 }
 
 resource "azurerm_network_manager_admin_rule" "default" {

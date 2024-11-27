@@ -51,8 +51,8 @@ locals {
   default_admin_rules = flatten([
     for sac in var.security_admin_configurations : [
       for k, v in local.default_rules_high_risk : {
-        name                     = "${sac.name}-${k}"
-        admin_rule_collection_id = azurerm_network_manager_admin_rule_collection.default[sac.name].id
+        name                     = "${sac.sac_name}-${k}"
+        admin_rule_collection_id = azurerm_network_manager_admin_rule_collection.default[sac.sac_name].id
         description              = v.description
         action                   = v.action
         direction                = v.direction

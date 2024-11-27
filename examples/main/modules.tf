@@ -1,39 +1,10 @@
-module "azure_region" {
-  source  = "claranet/regions/azurerm"
-  version = "x.x.x"
-
-  azure_region = var.azure_region
-}
-
-module "rg" {
-  source  = "claranet/rg/azurerm"
-  version = "x.x.x"
-
-  location    = module.azure_region.location
-  client_name = var.client_name
-  environment = var.environment
-  stack       = var.stack
-}
-
-module "run" {
-  source  = "claranet/run/azurerm"
-  version = "x.x.x"
-
-  client_name         = var.client_name
-  environment         = var.environment
-  stack               = var.stack
-  location            = module.azure_region.location
-  location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
-}
-
 module "network_manager" {
   source  = "claranet/network-manager/azurerm"
   version = "x.x.x"
 
   location            = module.azure_region.location
   location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
+  resource_group_name = module.rg.name
 
   client_name = var.client_name
   environment = var.environment
@@ -75,25 +46,25 @@ module "network_manager" {
   connectivity_configurations = [
     {
       connectivity_name     = "mesh-global"
-      network_group_name    = "mesh-global"
       connectivity_topology = "Mesh"
       global_mesh_enabled   = true
-      applies_to_group = {
+      applies_to_groups = [{
+        network_group_name  = "mesh-global"
         group_connectivity  = "DirectlyConnected"
         global_mesh_enabled = true
-      }
+      }]
     },
     {
       connectivity_name     = "hubspoke-region-euw"
       deploy                = true
-      network_group_name    = "hubspoke-euw"
       connectivity_topology = "HubAndSpoke"
       global_mesh_enabled   = false
-      applies_to_group = {
+      applies_to_groups = [{
+        network_group_name  = "hubspoke-euw"
         group_connectivity  = "None"
         global_mesh_enabled = false
         use_hub_gateway     = true
-      }
+      }]
       # hub = {
       #   resource_id   = module.hub1.vnet.id
       #   resource_type = "Microsoft.Network/virtualNetworks"
