@@ -129,6 +129,7 @@ resource "azurerm_network_manager_deployment" "connectivity" {
     reconfiguration_hash = jsonencode({
       configuration_ids = local.connectivity_configuration_ids_to_deploy
     })
+    connectivity_changes = jsonencode(var.connectivity_configurations)
   }
   depends_on = [
     azurerm_network_manager_connectivity_configuration.main,
@@ -155,6 +156,7 @@ resource "azurerm_network_manager_deployment" "security" {
       destination_port_ranges = [for rule in local.default_rules_high_risk : rule.destination_port_ranges]
       rule_collections        = [for sac in var.security_admin_configurations : sac.rule_collections if sac.deploy]
     })
+    connectivity_changes = jsonencode(var.connectivity_configurations)
   }
   depends_on = [
     azurerm_network_manager_deployment.connectivity,
