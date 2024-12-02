@@ -56,7 +56,7 @@ resource "azurerm_network_manager_connectivity_configuration" "main" {
     iterator = grp
 
     content {
-      group_connectivity  = grp.value.group_connectivity
+      group_connectivity  = grp.value.direct_connectivity_enabled ? "DirectlyConnected" : "None"
       network_group_id    = azurerm_network_manager_network_group.main[grp.value.network_group_name].id
       global_mesh_enabled = grp.value.global_mesh_enabled
       use_hub_gateway     = grp.value.use_hub_gateway

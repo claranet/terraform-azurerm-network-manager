@@ -26,10 +26,10 @@ variable "connectivity_configurations" {
     }), null)
 
     applies_to_groups = list(object({
-      network_group_name  = string
-      group_connectivity  = optional(string, "None")
-      global_mesh_enabled = optional(bool, false)
-      use_hub_gateway     = optional(bool, false)
+      network_group_name          = string
+      direct_connectivity_enabled = optional(bool, false)
+      global_mesh_enabled         = optional(bool, false)
+      use_hub_gateway             = optional(bool, false)
     }))
   }))
   default  = []
