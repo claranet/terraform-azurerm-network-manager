@@ -41,6 +41,7 @@ locals {
   static_members_vnet = flatten([
     for ng in var.network_groups : [
       for id in ng.static_members : {
+        key_name         = "${ng.ng_name}-${basename(id)}"
         name             = basename(id)
         resource_id      = id
         network_group_id = azurerm_network_manager_network_group.main[ng.ng_name].id

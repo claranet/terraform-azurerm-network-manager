@@ -19,7 +19,7 @@ resource "azurerm_network_manager_network_group" "main" {
 # static members
 
 resource "azurerm_network_manager_static_member" "main" {
-  for_each                  = { for member in local.static_members_vnet : member.resource_id => member }
+  for_each                  = { for member in local.static_members_vnet : member.key_name => member }
   name                      = lower(each.value.name)
   network_group_id          = each.value.network_group_id
   target_virtual_network_id = each.value.resource_id
