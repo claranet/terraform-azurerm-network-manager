@@ -173,6 +173,7 @@ resource "azurerm_network_manager_deployment" "connectivity" {
     azurerm_network_manager_connectivity_configuration.main,
     azurerm_network_manager_security_admin_configuration.main,
     azurerm_network_manager_admin_rule.default,
+    azurerm_network_manager_admin_rule.main,
   ]
 }
 
@@ -198,5 +199,9 @@ resource "azurerm_network_manager_deployment" "security" {
   }
   depends_on = [
     azurerm_network_manager_deployment.connectivity,
+    azurerm_network_manager_connectivity_configuration.main,
+    azurerm_network_manager_security_admin_configuration.main,
+    azurerm_network_manager_admin_rule.default,
+    azurerm_network_manager_admin_rule.main,
   ]
 }
