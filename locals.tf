@@ -8,7 +8,7 @@ locals {
       description = "tcp-high-risk"
       action      = "Deny"
       direction   = "Inbound"
-      priority    = 1
+      priority    = 101
       protocol    = "Tcp"
       destination_port_ranges = [
         "20", "21", "23", "111", "119", "135", "161", "162", "445", "512", "514", "593", "873", "2049", "5800", "5900", "11211",
@@ -24,7 +24,7 @@ locals {
       description = "udp-high-risk"
       action      = "Deny"
       direction   = "Inbound"
-      priority    = 2
+      priority    = 102
       protocol    = "Udp"
       destination_port_ranges = [
         "111", "135", "162", "593", "2049",
