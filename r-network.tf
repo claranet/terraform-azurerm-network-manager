@@ -73,10 +73,10 @@ resource "azurerm_network_manager_security_admin_configuration" "main" {
   network_manager_id = azurerm_network_manager.main.id
 }
 
-# default
+# default rules
 
 resource "azurerm_network_manager_admin_rule_collection" "default" {
-  for_each                        = { for sac in var.security_admin_configurations : sac.sac_name => sac.apply_default_rules }
+  for_each                        = { for sac in var.security_admin_configurations : sac.sac_name => sac if sac.apply_default_rules }
   name                            = "arc-${each.key}-default"
   security_admin_configuration_id = azurerm_network_manager_security_admin_configuration.main[each.key].id
   network_group_ids               = [for ng in var.network_groups : azurerm_network_manager_network_group.main[ng.ng_name].id]
