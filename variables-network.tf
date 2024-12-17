@@ -47,9 +47,9 @@ variable "security_admin_configurations" {
     deploy              = optional(bool, false)
 
     rule_collections = optional(list(object({
-      name              = string
-      description       = optional(string)
-      network_group_ids = list(string)
+      name                = string
+      description         = optional(string)
+      network_group_names = list(string)
       rules = list(object({
         name                    = string
         description             = optional(string)

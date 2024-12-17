@@ -110,6 +110,44 @@ resource "azurerm_network_manager_admin_rule" "default" {
   }
 }
 
+# custom rules
+
+resource "azurerm_network_manager_admin_rule_collection" "main" {
+  for_each                        = { for collection in local.custom_rule_collections : collection.name => collection }
+  name                            = "arc-${each.key}"
+  description                     = each.value.rc.description
+  security_admin_configuration_id = azurerm_network_manager_security_admin_configuration.main[each.value.sac.sac_name].id
+  network_group_ids               = [for ng in each.value.rc.network_group_names : azurerm_network_manager_network_group.main[ng].id]
+}
+
+resource "azurerm_network_manager_admin_rule" "main" {
+  for_each                 = { for rule in local.custom_rules : rule.name => rule }
+  name                     = "ar-${each.key}"
+  admin_rule_collection_id = each.value.admin_rule_collection_id
+  description              = each.value.description
+  action                   = each.value.action
+  direction                = each.value.direction
+  priority                 = each.value.priority
+  protocol                 = each.value.protocol
+  destination_port_ranges  = each.value.destination_port_ranges
+
+  dynamic "source" {
+    for_each = each.value.source
+    content {
+      address_prefix_type = source.value.address_prefix_type
+      address_prefix      = source.value.address_prefix
+    }
+  }
+
+  dynamic "destination" {
+    for_each = each.value.destinations
+    content {
+      address_prefix_type = destination.value.address_prefix_type
+      address_prefix      = destination.value.address_prefix
+    }
+  }
+}
+
 ####################################################
 # deployment
 ####################################################

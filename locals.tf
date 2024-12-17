@@ -65,6 +65,33 @@ locals {
       }
     ] if sac.apply_default_rules
   ])
+  custom_rule_collections = flatten([
+    for sac in var.security_admin_configurations : [
+      for rc in sac.rule_collections : {
+        name = "${sac.sac_name}-${rc.name}"
+        sac  = sac
+        rc   = rc
+      }
+    ]
+  ])
+  custom_rules = flatten([
+    for sac in var.security_admin_configurations : [
+      for rc in sac.rule_collections : [
+        for rule in rc.rules : {
+          name                     = "${rc.name}-${rule.name}"
+          admin_rule_collection_id = azurerm_network_manager_admin_rule_collection.main["${sac.sac_name}-${rc.name}"].id
+          description              = rule.description
+          action                   = rule.action
+          direction                = rule.direction
+          priority                 = rule.priority
+          protocol                 = rule.protocol
+          destination_port_ranges  = rule.destination_port_ranges
+          source                   = rule.source
+          destinations             = rule.destinations
+        }
+      ]
+    ]
+  ])
   connectivity_configuration_ids_to_deploy = concat(
     var.connectivity_deployment.configuration_ids,
     [for c in var.connectivity_deployment.configuration_names :
