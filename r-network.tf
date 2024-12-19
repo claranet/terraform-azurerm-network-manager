@@ -62,6 +62,15 @@ resource "azurerm_network_manager_connectivity_configuration" "main" {
       use_hub_gateway     = grp.value.use_hub_gateway
     }
   }
+
+  lifecycle {
+    postcondition {
+      condition = alltrue([for c in var.connectivity_deployment.configuration_names :
+        contains([for cc in var.connectivity_configurations : cc.connectivity_name], c)
+      ])
+      error_message = "At least one Connectivity configuration name declared in `var.connectivity_deployment.configuration_names` is not found."
+    }
+  }
 }
 
 # security
@@ -71,6 +80,15 @@ resource "azurerm_network_manager_security_admin_configuration" "main" {
   for_each           = { for sac in var.security_admin_configurations : sac.sac_name => sac }
   name               = coalesce(each.value.custom_name, data.azurecaf_name.network_manager_security_admin[each.key].result)
   network_manager_id = azurerm_network_manager.main.id
+
+  lifecycle {
+    postcondition {
+      condition = alltrue([for c in var.security_deployment.configuration_names :
+        contains([for sac in var.security_admin_configurations : sac.sac_name], c)
+      ])
+      error_message = "At least one Security configuration name declared in `var.security_deployment.configuration_names` is not found."
+    }
+  }
 }
 
 # default rules
