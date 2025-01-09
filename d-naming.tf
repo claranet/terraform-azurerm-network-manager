@@ -15,7 +15,7 @@ data "azurecaf_name" "network_manager_group" {
   name          = var.stack
   resource_type = "azurerm_resource_group" # "azurerm_network_manager_network_group"
   prefixes      = compact(["ng", local.name_prefix])
-  suffixes      = compact([var.client_name, var.location_short, var.environment, local.name_suffix, each.key])
+  suffixes      = compact([var.client_name, local.name_suffix, each.key])
   use_slug      = false
   clean_input   = true
   separator     = "-"
@@ -27,7 +27,7 @@ data "azurecaf_name" "network_manager_connectivity_configuration" {
   name          = var.stack
   resource_type = "azurerm_resource_group"
   prefixes      = compact(["cc-ng", local.name_prefix])
-  suffixes      = compact([var.client_name, var.location_short, var.environment, local.name_suffix, each.key])
+  suffixes      = compact([var.client_name, local.name_suffix, each.key])
   use_slug      = false
   clean_input   = true
   separator     = "-"
@@ -39,7 +39,7 @@ data "azurecaf_name" "network_manager_security_admin" {
   name          = var.stack
   resource_type = "azurerm_resource_group"
   prefixes      = compact(["sac-ng", local.name_prefix])
-  suffixes      = compact([var.client_name, var.location_short, var.environment, local.name_suffix, each.key])
+  suffixes      = compact([var.client_name, local.name_suffix, each.key])
   use_slug      = false
   clean_input   = true
   separator     = "-"

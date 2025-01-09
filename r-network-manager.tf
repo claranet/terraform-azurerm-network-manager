@@ -26,4 +26,8 @@ resource "azurerm_network_manager" "main" {
   }
 
   tags = merge(local.default_tags, var.extra_tags)
+
+  depends_on = [
+    azapi_resource_action.main
+  ]
 }

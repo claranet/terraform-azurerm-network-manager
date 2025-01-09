@@ -15,7 +15,6 @@ variable "connectivity_configurations" {
   description = "Connectivity configurations to be created in the Azure Network Manager."
   type = list(object({
     connectivity_name     = string
-    network_group_name    = string
     custom_name           = optional(string)
     connectivity_topology = optional(string)
     global_mesh_enabled   = optional(bool, false)
@@ -26,11 +25,12 @@ variable "connectivity_configurations" {
       resource_type = optional(string, "Microsoft.Network/virtualNetworks")
     }), null)
 
-    applies_to_group = object({
-      group_connectivity  = optional(string, "None")
-      global_mesh_enabled = optional(bool, false)
-      use_hub_gateway     = optional(bool, false)
-    })
+    applies_to_groups = list(object({
+      network_group_name          = string
+      direct_connectivity_enabled = optional(bool, false)
+      global_mesh_enabled         = optional(bool, false)
+      use_hub_gateway             = optional(bool, false)
+    }))
   }))
   default  = []
   nullable = false
@@ -47,9 +47,9 @@ variable "security_admin_configurations" {
     deploy              = optional(bool, false)
 
     rule_collections = optional(list(object({
-      name              = string
-      description       = optional(string)
-      network_group_ids = list(string)
+      name                = string
+      description         = optional(string)
+      network_group_names = list(string)
       rules = list(object({
         name                    = string
         description             = optional(string)

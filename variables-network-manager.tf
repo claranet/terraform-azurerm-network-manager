@@ -4,8 +4,8 @@ variable "network_manager_scope" {
  - `subscription_ids` - (Optional) A list of subscription IDs.
 EOT
   type = object({
-    management_group_ids = optional(list(string))
-    subscription_ids     = optional(list(string))
+    management_group_ids = optional(list(string), [])
+    subscription_ids     = optional(list(string), [])
   })
   nullable = false
 }

@@ -8,7 +8,7 @@ locals {
       description = "tcp-high-risk"
       action      = "Deny"
       direction   = "Inbound"
-      priority    = 1
+      priority    = 101
       protocol    = "Tcp"
       destination_port_ranges = [
         "20", "21", "23", "111", "119", "135", "161", "162", "445", "512", "514", "593", "873", "2049", "5800", "5900", "11211",
@@ -24,7 +24,7 @@ locals {
       description = "udp-high-risk"
       action      = "Deny"
       direction   = "Inbound"
-      priority    = 2
+      priority    = 102
       protocol    = "Udp"
       destination_port_ranges = [
         "111", "135", "162", "593", "2049",
@@ -41,6 +41,7 @@ locals {
   static_members_vnet = flatten([
     for ng in var.network_groups : [
       for id in ng.static_members : {
+        key_name         = "${ng.ng_name}-${basename(id)}"
         name             = basename(id)
         resource_id      = id
         network_group_id = azurerm_network_manager_network_group.main[ng.ng_name].id
@@ -51,8 +52,8 @@ locals {
   default_admin_rules = flatten([
     for sac in var.security_admin_configurations : [
       for k, v in local.default_rules_high_risk : {
-        name                     = "${sac.name}-${k}"
-        admin_rule_collection_id = azurerm_network_manager_admin_rule_collection.default[sac.name].id
+        name                     = "${sac.sac_name}-${k}"
+        admin_rule_collection_id = azurerm_network_manager_admin_rule_collection.default[sac.sac_name].id
         description              = v.description
         action                   = v.action
         direction                = v.direction
@@ -63,6 +64,33 @@ locals {
         destinations             = v.destinations
       }
     ] if sac.apply_default_rules
+  ])
+  custom_rule_collections = flatten([
+    for sac in var.security_admin_configurations : [
+      for rc in sac.rule_collections : {
+        name = "${sac.sac_name}-${rc.name}"
+        sac  = sac
+        rc   = rc
+      }
+    ]
+  ])
+  custom_rules = flatten([
+    for sac in var.security_admin_configurations : [
+      for rc in sac.rule_collections : [
+        for rule in rc.rules : {
+          name                     = "${rc.name}-${rule.name}"
+          admin_rule_collection_id = azurerm_network_manager_admin_rule_collection.main["${sac.sac_name}-${rc.name}"].id
+          description              = rule.description
+          action                   = rule.action
+          direction                = rule.direction
+          priority                 = rule.priority
+          protocol                 = rule.protocol
+          destination_port_ranges  = rule.destination_port_ranges
+          source                   = rule.source
+          destinations             = rule.destinations
+        }
+      ]
+    ]
   ])
   connectivity_configuration_ids_to_deploy = concat(
     var.connectivity_deployment.configuration_ids,

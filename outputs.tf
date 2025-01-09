@@ -1,4 +1,4 @@
-output "network_manager" {
+output "resource" {
   description = "Azure Network Manager output object."
   value       = azurerm_network_manager.main
 }
@@ -13,18 +13,22 @@ output "name" {
   value       = azurerm_network_manager.main.name
 }
 
-
-output "vnet_network_groups" {
-  description = "network groups"
+output "resource_vnet_network_groups" {
+  description = "Network groups resource objects."
   value       = azurerm_network_manager_network_group.main
 }
 
-output "connectivity_configurations" {
-  description = "connectivity configurations"
+output "resource_connectivity_configurations" {
+  description = "Connectivity configurations resource objects."
   value       = azurerm_network_manager_connectivity_configuration.main
 }
 
-output "security_configurations" {
-  description = "security configurations"
+output "resource_security_configurations" {
+  description = "Security configurations resource objects."
   value       = azurerm_network_manager_security_admin_configuration.main
+}
+
+output "module_diagnostics" {
+  description = "Diagnostics settings module outputs."
+  value       = module.diagnostics
 }

@@ -34,42 +34,13 @@ More details about variables set by the `terraform-wrapper` available in the [do
 [Hashicorp Terraform](https://github.com/hashicorp/terraform/). Instead, we recommend to use [OpenTofu](https://github.com/opentofu/opentofu/).
 
 ```hcl
-module "azure_region" {
-  source  = "claranet/regions/azurerm"
-  version = "x.x.x"
-
-  azure_region = var.azure_region
-}
-
-module "rg" {
-  source  = "claranet/rg/azurerm"
-  version = "x.x.x"
-
-  location    = module.azure_region.location
-  client_name = var.client_name
-  environment = var.environment
-  stack       = var.stack
-}
-
-module "run" {
-  source  = "claranet/run/azurerm"
-  version = "x.x.x"
-
-  client_name         = var.client_name
-  environment         = var.environment
-  stack               = var.stack
-  location            = module.azure_region.location
-  location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
-}
-
 module "network_manager" {
   source  = "claranet/network-manager/azurerm"
   version = "x.x.x"
 
   location            = module.azure_region.location
   location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
+  resource_group_name = module.rg.name
 
   client_name = var.client_name
   environment = var.environment
@@ -111,25 +82,25 @@ module "network_manager" {
   connectivity_configurations = [
     {
       connectivity_name     = "mesh-global"
-      network_group_name    = "mesh-global"
       connectivity_topology = "Mesh"
       global_mesh_enabled   = true
-      applies_to_group = {
+      applies_to_groups = [{
+        network_group_name  = "mesh-global"
         group_connectivity  = "DirectlyConnected"
         global_mesh_enabled = true
-      }
+      }]
     },
     {
       connectivity_name     = "hubspoke-region-euw"
       deploy                = true
-      network_group_name    = "hubspoke-euw"
       connectivity_topology = "HubAndSpoke"
       global_mesh_enabled   = false
-      applies_to_group = {
+      applies_to_groups = [{
+        network_group_name  = "hubspoke-euw"
         group_connectivity  = "None"
         global_mesh_enabled = false
         use_hub_gateway     = true
-      }
+      }]
       # hub = {
       #   resource_id   = module.hub1.vnet.id
       #   resource_type = "Microsoft.Network/virtualNetworks"
@@ -175,22 +146,26 @@ module "network_manager" {
 
 | Name | Version |
 |------|---------|
-| azurecaf | ~> 1.2, >= 1.2.22 |
-| azurerm | ~> 3.63 |
+| azapi | >= 2.0 |
+| azurecaf | ~> 1.2.28 |
+| azurerm | ~> 4.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| diagnostics | claranet/diagnostic-settings/azurerm | ~> 7.0.0 |
+| diagnostics | claranet/diagnostic-settings/azurerm | ~> 8.0.0 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
+| [azapi_resource_action.main](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource_action) | resource |
 | [azurerm_network_manager.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager) | resource |
 | [azurerm_network_manager_admin_rule.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule) | resource |
+| [azurerm_network_manager_admin_rule.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule) | resource |
 | [azurerm_network_manager_admin_rule_collection.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule_collection) | resource |
+| [azurerm_network_manager_admin_rule_collection.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule_collection) | resource |
 | [azurerm_network_manager_connectivity_configuration.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_connectivity_configuration) | resource |
 | [azurerm_network_manager_deployment.connectivity](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_deployment) | resource |
 | [azurerm_network_manager_deployment.security](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_deployment) | resource |
@@ -207,27 +182,27 @@ module "network_manager" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | client\_name | Client name/account used in naming. | `string` | n/a | yes |
-| connectivity\_configurations | Connectivity configurations to be created in the Azure Network Manager. | <pre>list(object({<br/>    connectivity_name     = string<br/>    network_group_name    = string<br/>    custom_name           = optional(string)<br/>    connectivity_topology = optional(string)<br/>    global_mesh_enabled   = optional(bool, false)<br/>    deploy                = optional(bool, false)<br/><br/>    hub = optional(object({<br/>      resource_id   = string<br/>      resource_type = optional(string, "Microsoft.Network/virtualNetworks")<br/>    }), null)<br/><br/>    applies_to_group = object({<br/>      group_connectivity  = optional(string, "None")<br/>      global_mesh_enabled = optional(bool, false)<br/>      use_hub_gateway     = optional(bool, false)<br/>    })<br/>  }))</pre> | `[]` | no |
+| connectivity\_configurations | Connectivity configurations to be created in the Azure Network Manager. | <pre>list(object({<br/>    connectivity_name     = string<br/>    custom_name           = optional(string)<br/>    connectivity_topology = optional(string)<br/>    global_mesh_enabled   = optional(bool, false)<br/>    deploy                = optional(bool, false)<br/><br/>    hub = optional(object({<br/>      resource_id   = string<br/>      resource_type = optional(string, "Microsoft.Network/virtualNetworks")<br/>    }), null)<br/><br/>    applies_to_groups = list(object({<br/>      network_group_name          = string<br/>      direct_connectivity_enabled = optional(bool, false)<br/>      global_mesh_enabled         = optional(bool, false)<br/>      use_hub_gateway             = optional(bool, false)<br/>    }))<br/>  }))</pre> | `[]` | no |
 | connectivity\_deployment | Connectivity deployment configuration over `connectivity` created objects. | <pre>object({<br/>    configuration_names = optional(list(string), [])<br/>    configuration_ids   = optional(list(string), [])<br/>  })</pre> | `{}` | no |
-| custom\_diagnostic\_settings\_name | Custom name of the diagnostics settings, name will be 'default' if not set. | `string` | `"default"` | no |
-| custom\_name | Custom Azure Network Manager, generated if not set | `string` | `""` | no |
+| custom\_name | Custom Azure Network Manager, generated if not set. | `string` | `""` | no |
 | default\_tags\_enabled | Option to enable or disable default tags. | `bool` | `true` | no |
+| diagnostic\_settings\_custom\_name | Custom name of the diagnostics settings, name will be `default` if not set. | `string` | `"default"` | no |
 | environment | Project environment. | `string` | n/a | yes |
 | extra\_tags | Additional tags to add on resources. | `map(string)` | `{}` | no |
 | location | Azure region to use. | `string` | n/a | yes |
 | location\_short | Short string for Azure location. | `string` | n/a | yes |
 | logs\_categories | Log categories to send to destinations. | `list(string)` | `null` | no |
-| logs\_destinations\_ids | List of destination resources IDs for logs diagnostic destination.<br/>Can be `Storage Account`, `Log Analytics Workspace` and `Event Hub`. No more than one of each can be set.<br/>If you want to specify an Azure EventHub to send logs and metrics to, you need to provide a formated string with both the EventHub Namespace authorization send ID and the EventHub name (name of the queue to use in the Namespace) separated by the `|` character. | `list(string)` | n/a | yes |
+| logs\_destinations\_ids | List of destination resources IDs for logs diagnostic destination.<br/>Can be `Storage Account`, `Log Analytics Workspace` and `Event Hub`. No more than one of each can be set.<br/>If you want to use Azure EventHub as a destination, you must provide a formatted string containing both the EventHub Namespace authorization send ID and the EventHub name (name of the queue to use in the Namespace) separated by the <code>&#124;</code> character. | `list(string)` | n/a | yes |
 | logs\_metrics\_categories | Metrics categories to send to destinations. | `list(string)` | `null` | no |
-| name\_prefix | Optional prefix for the generated name | `string` | `""` | no |
-| name\_suffix | Optional suffix for the generated name | `string` | `""` | no |
+| name\_prefix | Optional prefix for the generated name. | `string` | `""` | no |
+| name\_suffix | Optional suffix for the generated name. | `string` | `""` | no |
 | network\_groups | Network groups to be created in the Azure Network Manager. | <pre>list(object({<br/>    ng_name        = string<br/>    custom_name    = optional(string)<br/>    description    = optional(string)<br/>    member_type    = optional(string, "VirtualNetwork")<br/>    static_members = optional(list(string))<br/>  }))</pre> | `[]` | no |
 | network\_manager\_description | A description of the Network Manager. | `string` | `null` | no |
-| network\_manager\_scope | - `management_group_ids` - (Optional) A list of management group IDs.<br/>- `subscription_ids` - (Optional) A list of subscription IDs. | <pre>object({<br/>    management_group_ids = optional(list(string))<br/>    subscription_ids     = optional(list(string))<br/>  })</pre> | n/a | yes |
+| network\_manager\_scope | - `management_group_ids` - (Optional) A list of management group IDs.<br/>- `subscription_ids` - (Optional) A list of subscription IDs. | <pre>object({<br/>    management_group_ids = optional(list(string), [])<br/>    subscription_ids     = optional(list(string), [])<br/>  })</pre> | n/a | yes |
 | network\_manager\_scope\_accesses | A list of configuration deployment type. Possible values are `Connectivity` and `SecurityAdmin`, corresponds to if Connectivity Configuration and Security Admin Configuration is allowed for the Network Manager. | `list(string)` | n/a | yes |
 | network\_manager\_timeouts | - `create` - (Defaults to 30 minutes) Used when creating the Network Managers.<br/>- `delete` - (Defaults to 30 minutes) Used when deleting the Network Managers.<br/>- `read` - (Defaults to 5 minutes) Used when retrieving the Network Managers.<br/>- `update` - (Defaults to 30 minutes) Used when updating the Network Managers. | <pre>object({<br/>    create = optional(string)<br/>    delete = optional(string)<br/>    read   = optional(string)<br/>    update = optional(string)<br/>  })</pre> | `null` | no |
 | resource\_group\_name | Name of the resource group. | `string` | n/a | yes |
-| security\_admin\_configurations | Security admin configurations to be created in the Azure Network Manager. | <pre>list(object({<br/>    sac_name            = string<br/>    custom_name         = optional(string)<br/>    description         = optional(string)<br/>    apply_default_rules = optional(bool, true)<br/>    deploy              = optional(bool, false)<br/><br/>    rule_collections = optional(list(object({<br/>      name              = string<br/>      description       = optional(string)<br/>      network_group_ids = list(string)<br/>      rules = list(object({<br/>        name                    = string<br/>        description             = optional(string)<br/>        action                  = string<br/>        direction               = string<br/>        priority                = number<br/>        protocol                = string<br/>        destination_port_ranges = list(string)<br/>        source = list(object({<br/>          address_prefix_type = string<br/>          address_prefix      = string<br/>        }))<br/>        destinations = list(object({<br/>          address_prefix_type = string<br/>          address_prefix      = string<br/>        }))<br/>      }))<br/>    })))<br/>  }))</pre> | `[]` | no |
+| security\_admin\_configurations | Security admin configurations to be created in the Azure Network Manager. | <pre>list(object({<br/>    sac_name            = string<br/>    custom_name         = optional(string)<br/>    description         = optional(string)<br/>    apply_default_rules = optional(bool, true)<br/>    deploy              = optional(bool, false)<br/><br/>    rule_collections = optional(list(object({<br/>      name                = string<br/>      description         = optional(string)<br/>      network_group_names = list(string)<br/>      rules = list(object({<br/>        name                    = string<br/>        description             = optional(string)<br/>        action                  = string<br/>        direction               = string<br/>        priority                = number<br/>        protocol                = string<br/>        destination_port_ranges = list(string)<br/>        source = list(object({<br/>          address_prefix_type = string<br/>          address_prefix      = string<br/>        }))<br/>        destinations = list(object({<br/>          address_prefix_type = string<br/>          address_prefix      = string<br/>        }))<br/>      }))<br/>    })))<br/>  }))</pre> | `[]` | no |
 | security\_deployment | Security deployment configuration over `security_admin` created objects. | <pre>object({<br/>    configuration_names = optional(list(string), [])<br/>    configuration_ids   = optional(list(string), [])<br/>  })</pre> | `{}` | no |
 | stack | Project stack name. | `string` | n/a | yes |
 
@@ -235,12 +210,13 @@ module "network_manager" {
 
 | Name | Description |
 |------|-------------|
-| connectivity\_configurations | connectivity configurations |
 | id | Azure Network Manager ID. |
+| module\_diagnostics | Diagnostics settings module outputs. |
 | name | Azure Network Manager name. |
-| network\_manager | Azure Network Manager output object. |
-| security\_configurations | security configurations |
-| vnet\_network\_groups | network groups |
+| resource | Azure Network Manager output object. |
+| resource\_connectivity\_configurations | Connectivity configurations resource objects. |
+| resource\_security\_configurations | Security configurations resource objects. |
+| resource\_vnet\_network\_groups | Network groups resource objects. |
 <!-- END_TF_DOCS -->
 
 ## Related documentation
