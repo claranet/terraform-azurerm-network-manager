@@ -145,7 +145,7 @@ module "network_manager" {
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | azapi | >= 2.0 |
 | azurecaf | >= 1.2.28 |
 | azurerm | ~> 4.31 |
@@ -153,13 +153,13 @@ module "network_manager" {
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | diagnostics | claranet/diagnostic-settings/azurerm | ~> 8.2.0 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [azapi_resource_action.main](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource_action) | resource |
 | [azurerm_network_manager.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager) | resource |
 | [azurerm_network_manager_admin_rule.default](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_manager_admin_rule) | resource |
@@ -180,7 +180,7 @@ module "network_manager" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | client\_name | Client name/account used in naming. | `string` | n/a | yes |
 | connectivity\_configurations | Connectivity configurations to be created in the Azure Network Manager. | <pre>list(object({<br/>    connectivity_name     = string<br/>    custom_name           = optional(string)<br/>    connectivity_topology = optional(string)<br/>    global_mesh_enabled   = optional(bool, false)<br/>    deploy                = optional(bool, false)<br/><br/>    hub = optional(object({<br/>      resource_id   = string<br/>      resource_type = optional(string, "Microsoft.Network/virtualNetworks")<br/>    }), null)<br/><br/>    applies_to_groups = list(object({<br/>      network_group_name          = string<br/>      direct_connectivity_enabled = optional(bool, false)<br/>      global_mesh_enabled         = optional(bool, false)<br/>      use_hub_gateway             = optional(bool, false)<br/>    }))<br/>  }))</pre> | `[]` | no |
 | connectivity\_deployment | Connectivity deployment configuration over `connectivity` created objects. | <pre>object({<br/>    configuration_names = optional(list(string), [])<br/>    configuration_ids   = optional(list(string), [])<br/>  })</pre> | `{}` | no |
@@ -209,7 +209,7 @@ module "network_manager" {
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | id | Azure Network Manager ID. |
 | module\_diagnostics | Diagnostics settings module outputs. |
 | name | Azure Network Manager name. |
