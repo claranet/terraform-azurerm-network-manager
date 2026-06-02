@@ -1,6 +1,7 @@
 output "resource" {
   description = "Azure Network Manager output object."
   value       = azurerm_network_manager.main
+  sensitive   = true
 }
 
 output "id" {
@@ -16,16 +17,19 @@ output "name" {
 output "resource_vnet_network_groups" {
   description = "Network groups resource objects."
   value       = azurerm_network_manager_network_group.main
+  sensitive   = true
 }
 
 output "resource_connectivity_configurations" {
   description = "Connectivity configurations resource objects."
   value       = azurerm_network_manager_connectivity_configuration.main
+  sensitive   = true
 }
 
 output "resource_security_configurations" {
   description = "Security configurations resource objects."
   value       = azurerm_network_manager_security_admin_configuration.main
+  sensitive   = true
 }
 
 output "module_diagnostics" {
